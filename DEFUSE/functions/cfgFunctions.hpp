@@ -5,5 +5,7 @@ class COB
 	{
 		file = "DEFUSE\functions";
 		class codeCompare {};
+		class serverCountDown {};
+		class checkBomb {};
 	};
 };

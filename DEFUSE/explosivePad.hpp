@@ -248,7 +248,7 @@ class KeypadDefuse
 			offsetPressedX = 0.002;
 			offsetPressedY = 0.002;
 			soundClick[] = {"",0,0};
-			onMouseButtonDown = "[CODE, CODEINPUT] spawn COB_fnc_codeCompare; closeDialog 0";
+			onMouseButtonDown = "[CODEINPUT] spawn COB_fnc_codeCompare; closeDialog 0";
 		};
 		class Bclear: RscButton
 		{

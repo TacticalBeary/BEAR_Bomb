@@ -44,3 +44,14 @@ respawnDialog   = 0;   // 0 = Off, 1 = Score table on death.
 respawnOnStart   = 0;   // Start mission as if each player just respawned (Dialogs etc). 1 = TRUE 0 = FALSE.
 respawnButton    = 0;   // Disables respawn button in menu?
 
+class Extended_PreInit_EventHandlers {
+    class Mission_preInit {
+        init = "call compileScript ['XEH_preInit.sqf']";
+    };
+};
+
+class Extended_PostInit_EventHandlers {
+    class Mission_postInit {
+        init = "call compileScript ['XEH_postInit.sqf']";
+    };
+};

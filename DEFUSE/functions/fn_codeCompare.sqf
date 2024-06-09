@@ -1,26 +1,15 @@
-//Parameters
-private ["_code", "_inputCode"];
-_code      = [_this, 0, [], [[]]] call BIS_fnc_param;
-_inputCode = [_this, 1, [], [[]]] call BIS_fnc_param;
+params ["_inputCode"];
+private _code = missionNamespace getVariable ["bear_code", [0, 0, 0, 0, 0, 0]];
 
-//compare codes
-private "_compare";
-_compare = [_code, _inputCode] call BIS_fnc_areEqual;
-
-if (isServer && (_compare)) then {
+if (_code isEqualTo _inputCode) then {
     cutText ["BOMB DEFUSED", "PLAIN DOWN"];
-    caseBomb setVariable ["BEAR_DEFUSED", true, true];
+    missionNamespace setVariable ["BEAR_DEFUSED", true, true];
     ["Task_Defuse", "Succeeded"] call BIS_fnc_taskSetState;
-    casebomb removeAction caseBombActionID;
 } else {
     cutText ["BOMB ARMED", "PLAIN DOWN"];
-    // caseBomb setVariable ["BEAR_ARMED", true, true]; // not sure we need this var
-    caseBomb setVariable ["BEAR_timer", serverTime + 5, true];
+    missionNamespace setVariable ["BEAR_timer", 5, true];
     playSound "button_wrong";
-    casebomb removeAction caseBombActionID;
+    [{deleteVehicle caseBomb}, [], 5] call CBA_fnc_waitAndExecute;
 };
 
-CODEINPUT = [];
-
-//Return Value
 _code

@@ -50,16 +50,12 @@ BIS_fnc_endMission = compileFinal "";
 ["ACRE_PRC152", "default", 9, "description", "BK"] call acre_api_fnc_setPresetChannelField;
 
 SpawnInformantFNC =
-{
-	_class = (_this select 0);
-	_trigger = (_this select 1);
-	_zRot = (_this select 2);
-	_animationName = (_this select 3);
-	_text = (_this select 4);
+{	
+	params ["_class", "_trigger", "_zRot", "_animationName", "_text"];
 
 	//Spawn agent.
-	_pos = getPosATL _trigger;
-	_informant = createAgent [_class, _pos, [], 0, "NONE"];
+	private _pos = getPosATL _trigger;
+	private _informant = createAgent [_class, _pos, [], 0, "NONE"];
 	_informant setPosATL _pos;
 	
 	//Rotate.
@@ -102,77 +98,3 @@ SpawnInformantFNC =
 	//return.
 	_informant;
 };
-
-CODEINPUT = [];
-
-// Server decides the code and correct laptop
-if(isServer) then {
-    CODE = floor (random 10);
-    publicVariable "CODE";
-
-    codeHolder = selectRandom [LAPTOP1, LAPTOP2, LAPTOP3, LAPTOP4];
-    publicVariable "codeHolder";
-};
-
-// Waiting for server to decide which laptop is holder
-0 spawn {
-    waitUntil {sleep 1; !isNil"codeHolder"};
-    codeHolder addAction [("Search for a code"),"DEFUSE\searchAction.sqf","",1,true,true,"","(_target distance _this) < 3"];
-};
-
-caseBombActionID = caseBomb addAction [("Defuse the bomb"),{createDialog "KeypadDefuse";},"",1,true,true,"","(_target distance _this) < 5"];
-
-// wait before trigger activated
-waitUntil {sleep 1; triggerActivated bombTimer};
-
-if (isServer) then
-{
-    caseBomb setVariable ["BEAR_timer", serverTime + 300, true];
-	[ west, ["Task_Defuse"], ["Find the code and defuse the bomb before it explodes.", "Defuse the bomb", "DEFUSE"], objNull, FALSE ] call BIS_fnc_taskCreate;  
-  	[ west, ["Task_Secure"], ["Secure the SCUD launcher and bring it back to FOB Sentinel Ridge for proper disposal", "Secure CBRN SCUD Vehicle", "SECURE"], objNull, FALSE ] call BIS_fnc_taskCreate;
-
-    // Create separate thread, store it's handle
-    BEAR_serverCountDownThread = 0 spawn
-    {
-        private _alive = true;
-        private _defused = false;
-        private _remaining = 1;
-
-        while {_alive && !_defused} do
-        {
-            sleep 0.5;
-
-            _alive = alive caseBomb;
-            _defused = caseBomb getVariable ["BEAR_defused", false];
-            _remaining = (caseBomb getVariable ["BEAR_timer", 0]) - serverTime;
-
-            if (_remaining < 0) exitWith
-            {
-                // Detonate and kill everyone in range
-                createVehicle ["Bomb_03_F", getPos caseBomb, [], 0, "NONE"];
-                {if (_x distance caseBomb <= 15) then {_x setDamage 1};} forEach allUnits;
-                deleteVehicle caseBomb; // caseBomb is not alive anymore
-            };
-        };
-    };
-};
-
-// make sure the variable is successfully broadcasted over the network
-waitUntil {sleep 0.5; (caseBomb getVariable ["BEAR_timer", 0] != -1)};
-
-if (hasInterface) then {
-	0 spawn
-	{
-    private _remaining = 1;
-    while {(_remaining > 0) && !(caseBomb getVariable ["BEAR_DEFUSED", false])} do
-		{
-			sleep 1;
-			_remaining = (caseBomb getVariable ["BEAR_timer", 0]) - serverTime;
-			hintSilent format["Bomb Detonation: \n %1", [(_remaining/60), "HH:MM"] call BIS_fnc_timetostring];	
-			if (_remaining < 0) then
-            {
-                hintSilent "";
-            };
-		};
-	};
-}; 
